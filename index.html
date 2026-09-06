@@ -4,6 +4,10 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>🎱 Bingo Familiar Chile · Premium</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#f97316"/>
+<link rel="icon" href="icon.png"/>
+<link rel="apple-touch-icon" href="icon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 
 <script type="module">
@@ -725,8 +729,9 @@ let chatCount=0;
 function rndCode(){return Array(4).fill(0).map(()=>"ABCDEFGHJKLMNPQRSTUVWXYZ"[Math.floor(Math.random()*23)]).join("");}
 function colOf(n){return Math.floor((n-1)/15);}
 function fm(n){return "$"+Number(n).toLocaleString("es-CL");}
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function avc(name){return AVC[name.charCodeAt(0)%AVC.length];}
-function avHtml(name,sz=36){const c=avc(name);return `<div class="av" style="width:${sz}px;height:${sz}px;background:${c};font-size:${sz*.38}px;color:#fff;box-shadow:0 2px 8px ${c}88">${name[0].toUpperCase()}</div>`;}
+function avHtml(name,sz=36){const c=avc(name);return `<div class="av" style="width:${sz}px;height:${sz}px;background:${c};font-size:${sz*.38}px;color:#fff;box-shadow:0 2px 8px ${c}88">${escHtml(name[0].toUpperCase())}</div>`;}
 function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("sc-"+id).classList.add("active");}
 function closeModal(id){document.getElementById(id).classList.remove("show");}
 function showModal(id){document.getElementById(id).classList.add("show");}
@@ -937,7 +942,7 @@ function renderLobbyPlayers(){
       ${avHtml(p.name,36)}
       <div style="flex:1">
         <div style="font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px">
-          ${p.name}${isH?"<span>👑</span>":""}
+          ${escHtml(p.name)}${isH?"<span>👑</span>":""}
           ${isMe?`<span class="chip" style="color:var(--orange);border-color:#f9731644;background:#f9731622;font-size:11px">Tú</span>`:""}
         </div>
         <div style="color:var(--green);font-weight:800">${fm(p.balance)}</div>
@@ -1213,6 +1218,7 @@ function speakNumber(col, num){
 
 // Sonido de celebración (fanfarria)
 function playCelebSound(){
+  if(!musicOn) return;
   try{
     const ctx = getAudioCtx();
     if(ctx.state==="suspended") ctx.resume();
@@ -1234,6 +1240,7 @@ function playCelebSound(){
 
 // Sonido de número cantado (ding)
 function playDing(){
+  if(!musicOn) return;
   try{
     const ctx = getAudioCtx();
     if(ctx.state==="suspended") ctx.resume();
@@ -1484,7 +1491,7 @@ function renderPatterns(){
       ${iWon
         ? `<span class="chip" style="color:var(--green);border-color:#22c55e44;background:#22c55e22">✓ Tuyo</span>`
         : alreadyWon
-          ? `<span class="chip" style="color:#f43f5e;border-color:#f43f5e44;background:#f43f5e11">🏆 ${ganador?.name||"Otro"}</span>`
+          ? `<span class="chip" style="color:#f43f5e;border-color:#f43f5e44;background:#f43f5e11">🏆 ${escHtml(ganador?.name||"Otro")}</span>`
           : !myConfirmed
             ? `<span class="chip" style="color:#7770aa;border-color:#33335544;background:#22223a">⏸️ Saltaste</span>`
             : canClaim
@@ -1539,7 +1546,7 @@ function renderSaldos(){
       <div style="display:flex;align-items:center;gap:11px">
         ${avHtml(p.name,38)}
         <div style="flex:1">
-          <div style="font-weight:800;font-size:16px">${p.name}${isMe?" (tú)":""}</div>
+          <div style="font-weight:800;font-size:16px">${escHtml(p.name)}${isMe?" (tú)":""}</div>
           <div style="font-family:'Fredoka One',cursive;font-size:21px;color:${p.balance>0?"var(--green)":"var(--red)"}">${fm(p.balance)}</div>
         </div>
       </div>
@@ -1576,7 +1583,7 @@ function syncChat(chatObj){
     return `<div style="display:flex;flex-direction:${isMe?"row-reverse":"row"};align-items:flex-end;gap:7px">
       ${!m.sys?avHtml(m.name,27):`<div style="width:27px"></div>`}
       <div class="bubble" style="background:${m.sys?"#eab30822":isMe?"#f9731622":"var(--s2)"};border:1px solid ${m.sys?"#eab30844":isMe?"#f9731644":"var(--border)"}">
-        ${!m.sys&&!isMe?`<div style="font-size:11px;color:var(--muted);margin-bottom:2px">${m.name}</div>`:""}
+        ${!m.sys&&!isMe?`<div style="font-size:11px;color:var(--muted);margin-bottom:2px">${escHtml(m.name)}</div>`:""}
         <div style="font-size:14px;color:${m.sys?"var(--yellow)":"var(--text)"}">${m.text}</div>
       </div>
     </div>`;
@@ -1840,7 +1847,7 @@ function showGameOver(){
       <div style="font-size:28px">${emoji}</div>
       <div style="flex:1;text-align:left">
         <div style="font-size:12px;color:var(--muted);font-weight:700">${label}</div>
-        <div style="font-weight:800;font-size:17px">${winPlayer?winPlayer.name:"—"}</div>
+        <div style="font-weight:800;font-size:17px">${winPlayer?escHtml(winPlayer.name):"—"}</div>
       </div>
       <div style="font-family:'Fredoka One',cursive;font-size:22px;color:${color}">+${fm(prize)}</div>
     </div>`;
@@ -1853,7 +1860,7 @@ function showGameOver(){
     const isMe=p.id===myId;
     return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.07)">
       ${avHtml(p.name,32)}
-      <div style="flex:1;font-weight:800;font-size:15px">${p.name}${isMe?" (tú)":""}</div>
+      <div style="flex:1;font-weight:800;font-size:15px">${escHtml(p.name)}${isMe?" (tú)":""}</div>
       <div style="font-family:'Fredoka One',cursive;font-size:20px;color:${p.balance>0?"var(--green)":"var(--red)"}">${fm(p.balance)}</div>
     </div>`;
   }).join("");
